@@ -2,8 +2,8 @@
   "region": "Chest",
   "projection": "PA",
   "title": "Normal Chest Radiography",
-  "image": "",
-  "imageSource": "",
+  "image": "/17298_lores.jpg",
+  "imageSource": "https://wwwn.cdc.gov/phil/Details.aspx?pid=17298",
   "attribution": "",
   "educationalUseOnly": true,
   "structures": [
