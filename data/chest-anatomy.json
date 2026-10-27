@@ -1,0 +1,35 @@
+{
+  "region": "Chest",
+  "projection": "PA",
+  "title": "Normal Chest Radiography",
+  "image": "",
+  "imageSource": "",
+  "attribution": "",
+  "educationalUseOnly": true,
+  "structures": [
+    {
+      "id": "trachea",
+      "name": "Trachea",
+      "description": "Airway extending from the larynx to the main bronchi.",
+      "annotation": null
+    },
+    {
+      "id": "clavicles",
+      "name": "Clavicles",
+      "description": "Paired bones connecting the sternum to the shoulder girdle.",
+      "annotation": null
+    },
+    {
+      "id": "heart",
+      "name": "Cardiac silhouette",
+      "description": "The visible outline of the heart and adjacent structures.",
+      "annotation": null
+    },
+    {
+      "id": "diaphragm",
+      "name": "Hemidiaphragms",
+      "description": "The right and left diaphragmatic domes.",
+      "annotation": null
+    }
+  ]
+}
