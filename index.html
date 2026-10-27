@@ -351,70 +351,124 @@
 </main><footer>
   RadAnatomy Explorer · Educational prototype
 </footer><script>
-  const structures = {
+  const info = document.getElementById("info");
+  const svg = document.getElementById("anatomy");
+
+  let zoom = 1;
+  let labelsVisible = true;
+  let anatomyData = null;
+
+  const fallbackStructures = {
     sternum: {
       name: "Sternum",
-      description: "A flat bone in the anterior midline of the thorax. It consists of the manubrium, body and xiphoid process.",
-      radiology: "On chest radiographs, assess its position and the surrounding structures. The sternum is often better evaluated on dedicated lateral or other appropriate projections."
+      description: "A flat bone in the anterior midline of the thorax.",
+      radiology: "Assess its position and surrounding structures. Dedicated projections may be needed to evaluate it fully."
     },
     clavicles: {
       name: "Clavicles",
-      description: "Paired bones connecting the sternum to the scapulae through the acromioclavicular joints.",
-      radiology: "On a PA chest image, examine both clavicles for alignment, cortical continuity and symmetry. Rotation and positioning can affect their apparent relationship to the thorax."
+      description: "Paired bones connecting the sternum to the shoulder girdle.",
+      radiology: "Assess alignment, cortical continuity and symmetry. Positioning can affect their apparent relationship to the thorax."
     },
     heart: {
-      name: "Heart",
-      description: "A muscular organ within the mediastinum, positioned between the lungs.",
-      radiology: "On a PA chest radiograph, assess the cardiac silhouette and its relationship to the thoracic width. Projection and patient positioning influence its apparent size."
+      name: "Cardiac silhouette",
+      description: "The visible outline of the heart and adjacent structures.",
+      radiology: "Assess the silhouette and its relationship to the thoracic width, taking projection and positioning into account."
     },
     diaphragm: {
-      name: "Diaphragm",
-      description: "A dome-shaped skeletal muscle separating the thoracic and abdominal cavities.",
-      radiology: "On an erect chest radiograph, both hemidiaphragms are usually visible. The right is commonly slightly higher than the left, although variation occurs."
+      name: "Hemidiaphragms",
+      description: "The right and left diaphragmatic domes.",
+      radiology: "Assess their outlines and positions. The right hemidiaphragm is commonly slightly higher than the left."
     },
     trachea: {
       name: "Trachea",
-      description: "An airway extending from the larynx and dividing into the main bronchi.",
-      radiology: "On a frontal chest image, examine the tracheal air column and its position relative to the midline."
+      description: "An airway extending from the larynx to the main bronchi.",
+      radiology: "Assess the tracheal air column and its position relative to the midline."
     }
   };
 
-  const info = document.getElementById("info");
+  function showStructure(id) {
+    const item = anatomyData?.structures?.find(
+      structure => structure.id === id
+    );
 
-  document.querySelectorAll("[data-id]").forEach(el => {
-    function selectStructure() {
-      const item = structures[el.dataset.id];
-      if (!item) return;
+    const fallback = fallbackStructures[id];
 
-      info.replaceChildren();
+    if (!item && !fallback) return;
 
-      const title = document.createElement("h3");
-      title.textContent = item.name;
+    const name = item?.name || fallback.name;
+    const description =
+      item?.description || fallback.description;
 
-      const description = document.createElement("p");
-      description.textContent = item.description;
+    const radiology =
+      fallback?.radiology ||
+      "Review this structure on an appropriate radiograph.";
 
-      const heading = document.createElement("strong");
-      heading.textContent = "Radiographic relevance";
+    info.replaceChildren();
 
-      const note = document.createElement("p");
-      note.textContent = item.radiology;
+    const title = document.createElement("h3");
+    title.textContent = name;
 
-      info.append(title, description, heading, note);
-    }
+    const descriptionText = document.createElement("p");
+    descriptionText.textContent = description;
 
-    el.addEventListener("click", selectStructure);
+    const heading = document.createElement("strong");
+    heading.textContent = "Radiographic relevance";
 
-    el.addEventListener("keydown", event => {
+    const radiologyText = document.createElement("p");
+    radiologyText.textContent = radiology;
+
+    info.append(
+      title,
+      descriptionText,
+      heading,
+      radiologyText
+    );
+  }
+
+  document.querySelectorAll("[data-id]").forEach(element => {
+    element.addEventListener("click", () => {
+      showStructure(element.dataset.id);
+    });
+
+    element.addEventListener("keydown", event => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        selectStructure();
+        showStructure(element.dataset.id);
       }
     });
   });
 
-  let zoom = 1;
-  const svg = document.getElementById("anatomy");
+  async function loadAnatomyData() {
+    try {
+      const response = await fetch("/data/chest-anatomy.json");
+
+      if (!response.ok) {
+        throw new Error("Could not load anatomy data.");
+      }
+
+      anatomyData = await response.json();
+
+      console.log("Anatomy data loaded:", anatomyData);
+
+      const notice = document.querySelector(".notice");
+
+      if (notice) {
+        notice.textContent =
+          "Anatomy data connected successfully. " +
+          "The current chest illustration remains schematic.";
+      }
+    } catch (error) {
+      console.error("Anatomy data loading failed:", error);
+
+      const notice = document.querySelector(".notice");
+
+      if (notice) {
+        notice.textContent =
+          "Using built-in anatomy information. " +
+          "The external anatomy data file could not be loaded.";
+      }
+    }
+  }
 
   function updateZoom() {
     svg.style.width = (100 * zoom) + "%";
@@ -436,10 +490,9 @@
     updateZoom();
   };
 
-  let labelsVisible = true;
-
   document.getElementById("showLabels").onclick = event => {
     labelsVisible = !labelsVisible;
+
     document.getElementById("labels").style.display =
       labelsVisible ? "block" : "none";
 
@@ -452,8 +505,11 @@
       document.getElementById("feedback").textContent =
         button.dataset.answer === "correct"
           ? "Correct! The diaphragm separates the thoracic and abdominal cavities."
-          : "Not quite. Think about the muscular partition beneath the lungs.";
+          : "Not quite. The diaphragm is the muscular partition between these cavities.";
     };
   });
-</script></body>
+
+  loadAnatomyData();
+</script>
+  </body>
 </html>
