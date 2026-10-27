@@ -1,0 +1,459 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1220">
+  <title>Radiographic Anatomy Explorer</title>  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b1220;
+      color: #e8eef8;
+    }
+
+    header {
+      padding: 22px 18px;
+      background: #111c30;
+      border-bottom: 1px solid #293750;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 23px;
+      color: #69ddff;
+    }
+
+    header p {
+      color: #a7b7cc;
+      font-size: 13px;
+      margin-bottom: 0;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 18px;
+    }
+
+    .notice {
+      padding: 12px;
+      background: #172b3c;
+      border-left: 3px solid #69ddff;
+      border-radius: 5px;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 18px;
+    }
+
+    .panel {
+      background: #111c30;
+      border: 1px solid #293750;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .panel h2 {
+      font-size: 16px;
+      margin: 0;
+      padding: 16px;
+      border-bottom: 1px solid #293750;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px;
+    }
+
+    button {
+      background: #20324a;
+      color: #e8eef8;
+      border: 1px solid #40536e;
+      border-radius: 6px;
+      padding: 10px 12px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    button:hover, button:focus {
+      background: #28516b;
+      outline-color: #69ddff;
+    }
+
+    .viewer {
+      background: #080d16;
+      min-height: 420px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: auto;
+      padding: 10px;
+    }
+
+    svg {
+      width: 100%;
+      max-width: 490px;
+      height: auto;
+      touch-action: pan-y;
+    }
+
+    .structure {
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+
+    .structure:hover {
+      opacity: .7;
+    }
+
+    .structure:focus {
+      outline: none;
+      stroke: #69ddff;
+      stroke-width: 4;
+    }
+
+    .label {
+      fill: #ffffff;
+      font-size: 12px;
+      paint-order: stroke;
+      stroke: #080d16;
+      stroke-width: 3px;
+      stroke-linejoin: round;
+      pointer-events: none;
+    }
+
+    .info {
+      padding: 16px;
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .info h3 {
+      color: #69ddff;
+      margin-top: 0;
+    }
+
+    .muted {
+      color: #a7b7cc;
+    }
+
+    .quiz {
+      padding: 16px;
+      border-top: 1px solid #293750;
+    }
+
+    .quiz h3 {
+      margin-top: 0;
+      font-size: 16px;
+    }
+
+    .quiz button {
+      display: block;
+      width: 100%;
+      margin: 8px 0;
+      text-align: left;
+    }
+
+    #feedback {
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    footer {
+      text-align: center;
+      color: #8ea0b8;
+      padding: 25px 15px;
+      font-size: 12px;
+    }
+
+    @media (max-width: 720px) {
+      .layout { grid-template-columns: 1fr; }
+      .viewer { min-height: 340px; }
+      header h1 { font-size: 20px; }
+    }
+  </style></head><body><header>
+  <h1>RadAnatomy Explorer</h1>
+  <p>Interactive anatomy and radiographic learning</p>
+</header><main>
+  <div class="notice">
+    <strong>Learning prototype:</strong>
+    This first version uses a schematic chest illustration,
+    not a clinical radiograph. Real, appropriately licensed
+    radiographic images will be added in a later stage.
+  </div>  <div class="layout"><section class="panel">
+  <h2>Chest Anatomy — Anterior View</h2>
+
+  <div class="toolbar">
+    <button id="showLabels">Hide labels</button>
+    <button id="zoomIn">Zoom +</button>
+    <button id="zoomOut">Zoom −</button>
+    <button id="reset">Reset view</button>
+  </div>
+
+  <div class="viewer" id="viewer">
+    <svg id="anatomy" viewBox="0 0 360 430"
+         role="img"
+         aria-label="Schematic anterior chest anatomy">
+
+      <rect width="360" height="430" fill="#080d16"/>
+
+      <!-- Simplified chest outline -->
+      <path d="M105 45 Q70 75 65 145 L48 290
+               Q95 335 180 340 Q265 335 312 290
+               L295 145 Q290 75 255 45
+               Q180 15 105 45"
+            fill="#172333" stroke="#64758c"
+            stroke-width="2"/>
+
+      <!-- Schematic lungs -->
+      <path d="M145 105 Q115 90 97 135
+               L85 245 Q90 275 135 270
+               Q155 225 158 150 Z"
+            fill="#233c50" stroke="#69ddff"
+            stroke-width="1.5"/>
+
+      <path d="M215 105 Q245 90 263 135
+               L275 245 Q270 275 225 270
+               Q205 225 202 150 Z"
+            fill="#233c50" stroke="#69ddff"
+            stroke-width="1.5"/>
+
+      <!-- Simplified ribs -->
+      <g fill="none" stroke="#d3dce6"
+         stroke-width="3" opacity=".8">
+        <path d="M175 115 Q120 85 85 130"/>
+        <path d="M185 115 Q240 85 275 130"/>
+        <path d="M175 145 Q115 120 78 160"/>
+        <path d="M185 145 Q245 120 282 160"/>
+        <path d="M175 175 Q110 155 76 190"/>
+        <path d="M185 175 Q250 155 284 190"/>
+        <path d="M175 205 Q110 190 79 220"/>
+        <path d="M185 205 Q250 190 281 220"/>
+        <path d="M175 235 Q120 225 88 248"/>
+        <path d="M185 235 Q240 225 272 248"/>
+      </g>
+
+      <!-- Sternum -->
+      <path class="structure" tabindex="0"
+            role="button"
+            data-id="sternum"
+            d="M173 94 L187 94 L190 190
+               L185 218 L175 218 L170 190 Z"
+            fill="#e1e8f0" stroke="#ffffff"/>
+
+      <!-- Clavicles -->
+      <path class="structure" tabindex="0"
+            role="button"
+            data-id="clavicles"
+            d="M174 86 Q145 68 115 83
+               Q102 88 92 83"
+            fill="none" stroke="#f3d58a"
+            stroke-width="8" stroke-linecap="round"/>
+
+      <path class="structure" tabindex="0"
+            role="button"
+            data-id="clavicles"
+            d="M186 86 Q215 68 245 83
+               Q258 88 268 83"
+            fill="none" stroke="#f3d58a"
+            stroke-width="8" stroke-linecap="round"/>
+
+      <!-- Heart: schematic only -->
+      <path class="structure" tabindex="0"
+            role="button"
+            data-id="heart"
+            d="M177 180
+               C145 155 135 195 160 220
+               L190 250 L215 220
+               C240 185 208 158 177 180 Z"
+            fill="#c45b68" stroke="#f3a1aa"
+            stroke-width="2"/>
+
+      <!-- Diaphragm domes -->
+      <path class="structure" tabindex="0"
+            role="button"
+            data-id="diaphragm"
+            d="M85 270 Q125 235 165 275"
+            fill="none" stroke="#8ce0b0"
+            stroke-width="5" stroke-linecap="round"/>
+
+      <path class="structure" tabindex="0"
+            role="button"
+            data-id="diaphragm"
+            d="M195 275 Q240 230 275 270"
+            fill="none" stroke="#8ce0b0"
+            stroke-width="5" stroke-linecap="round"/>
+
+      <!-- Trachea -->
+      <path class="structure" tabindex="0"
+            role="button"
+            data-id="trachea"
+            d="M174 35 L174 95 L186 95 L186 35 Z"
+            fill="#b5d2dc" stroke="#e4f3f8"
+            stroke-width="1.5"/>
+
+      <!-- Labels -->
+      <g id="labels" class="label">
+        <text x="12" y="112">Clavicles</text>
+        <text x="12" y="185">Sternum</text>
+        <text x="225" y="207">Heart</text>
+        <text x="15" y="305">Diaphragm</text>
+        <text x="190" y="25">Trachea</text>
+        <text x="95" y="155">Right lung*</text>
+        <text x="210" y="155">Left lung*</text>
+      </g>
+
+      <text x="180" y="405"
+            text-anchor="middle"
+            fill="#8ea0b8" font-size="10">
+        SCHEMATIC — NOT FOR DIAGNOSIS
+      </text>
+
+    </svg>
+  </div>
+</section>
+
+<aside class="panel">
+  <h2>Structure Explorer</h2>
+
+  <div class="info" id="info">
+    <h3>Welcome</h3>
+    <p>Select a highlighted structure in the illustration
+       to explore its anatomy.</p>
+    <p class="muted">This illustration is simplified and
+       does not represent the actual appearance of a
+       radiograph.</p>
+  </div>
+
+  <div class="quiz">
+    <h3>Quick Quiz</h3>
+    <p id="question">Which structure separates the thoracic
+      cavity from the abdominal cavity?</p>
+
+    <button data-answer="wrong">Sternum</button>
+    <button data-answer="correct">Diaphragm</button>
+    <button data-answer="wrong">Clavicle</button>
+
+    <p id="feedback" aria-live="polite"></p>
+  </div>
+</aside>
+
+  </div>
+</main><footer>
+  RadAnatomy Explorer · Educational prototype
+</footer><script>
+  const structures = {
+    sternum: {
+      name: "Sternum",
+      description: "A flat bone in the anterior midline of the thorax. It consists of the manubrium, body and xiphoid process.",
+      radiology: "On chest radiographs, assess its position and the surrounding structures. The sternum is often better evaluated on dedicated lateral or other appropriate projections."
+    },
+    clavicles: {
+      name: "Clavicles",
+      description: "Paired bones connecting the sternum to the scapulae through the acromioclavicular joints.",
+      radiology: "On a PA chest image, examine both clavicles for alignment, cortical continuity and symmetry. Rotation and positioning can affect their apparent relationship to the thorax."
+    },
+    heart: {
+      name: "Heart",
+      description: "A muscular organ within the mediastinum, positioned between the lungs.",
+      radiology: "On a PA chest radiograph, assess the cardiac silhouette and its relationship to the thoracic width. Projection and patient positioning influence its apparent size."
+    },
+    diaphragm: {
+      name: "Diaphragm",
+      description: "A dome-shaped skeletal muscle separating the thoracic and abdominal cavities.",
+      radiology: "On an erect chest radiograph, both hemidiaphragms are usually visible. The right is commonly slightly higher than the left, although variation occurs."
+    },
+    trachea: {
+      name: "Trachea",
+      description: "An airway extending from the larynx and dividing into the main bronchi.",
+      radiology: "On a frontal chest image, examine the tracheal air column and its position relative to the midline."
+    }
+  };
+
+  const info = document.getElementById("info");
+
+  document.querySelectorAll("[data-id]").forEach(el => {
+    function selectStructure() {
+      const item = structures[el.dataset.id];
+      if (!item) return;
+
+      info.replaceChildren();
+
+      const title = document.createElement("h3");
+      title.textContent = item.name;
+
+      const description = document.createElement("p");
+      description.textContent = item.description;
+
+      const heading = document.createElement("strong");
+      heading.textContent = "Radiographic relevance";
+
+      const note = document.createElement("p");
+      note.textContent = item.radiology;
+
+      info.append(title, description, heading, note);
+    }
+
+    el.addEventListener("click", selectStructure);
+
+    el.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        selectStructure();
+      }
+    });
+  });
+
+  let zoom = 1;
+  const svg = document.getElementById("anatomy");
+
+  function updateZoom() {
+    svg.style.width = (100 * zoom) + "%";
+    svg.style.maxWidth = (490 * zoom) + "px";
+  }
+
+  document.getElementById("zoomIn").onclick = () => {
+    zoom = Math.min(zoom + 0.15, 2);
+    updateZoom();
+  };
+
+  document.getElementById("zoomOut").onclick = () => {
+    zoom = Math.max(zoom - 0.15, 0.7);
+    updateZoom();
+  };
+
+  document.getElementById("reset").onclick = () => {
+    zoom = 1;
+    updateZoom();
+  };
+
+  let labelsVisible = true;
+
+  document.getElementById("showLabels").onclick = event => {
+    labelsVisible = !labelsVisible;
+    document.getElementById("labels").style.display =
+      labelsVisible ? "block" : "none";
+
+    event.target.textContent =
+      labelsVisible ? "Hide labels" : "Show labels";
+  };
+
+  document.querySelectorAll("[data-answer]").forEach(button => {
+    button.onclick = () => {
+      document.getElementById("feedback").textContent =
+        button.dataset.answer === "correct"
+          ? "Correct! The diaphragm separates the thoracic and abdominal cavities."
+          : "Not quite. Think about the muscular partition beneath the lungs.";
+    };
+  });
+</script></body>
+</html>
