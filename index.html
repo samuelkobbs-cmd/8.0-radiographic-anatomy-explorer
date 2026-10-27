@@ -482,11 +482,17 @@
     }
   }
 
-  function updateZoom() {
-    svg.style.width = (100 * zoom) + "%";
-    svg.style.maxWidth = (490 * zoom) + "px";
-  }
+function updateZoom() {
+  const width = (100 * zoom) + "%";
+  const maxWidth = (490 * zoom) + "px";
 
+  svg.style.width = width;
+  svg.style.maxWidth = maxWidth;
+
+  const radiograph = document.getElementById("radiograph");
+  radiograph.style.width = width;
+  radiograph.style.maxWidth = maxWidth;
+  }
   document.getElementById("zoomIn").onclick = () => {
     zoom = Math.min(zoom + 0.15, 2);
     updateZoom();
@@ -520,7 +526,25 @@
           : "Not quite. The diaphragm is the muscular partition between these cavities.";
     };
   });
+let showingRadiograph = false;
 
+document.getElementById("toggleView").onclick = function () {
+  const radiograph = document.getElementById("radiograph");
+  const notice = document.querySelector(".notice");
+
+  showingRadiograph = !showingRadiograph;
+
+  svg.style.display = showingRadiograph ? "none" : "block";
+  radiograph.style.display = showingRadiograph ? "block" : "none";
+
+  this.textContent = showingRadiograph
+    ? "Schematic View"
+    : "Real Radiograph";
+
+  notice.textContent = showingRadiograph
+    ? "Real PA chest radiograph. Educational use only; this image is not a substitute for supervised radiographic interpretation."
+    : "Schematic illustration selected. Simplified anatomy for learning; not a clinical radiograph.";
+};
   loadAnatomyData();
 </script>
   </body>
